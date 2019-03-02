@@ -1,8 +1,20 @@
+const passport = require("passport");
+const session = require("express-session");
+const LocalStrategy = require("passport-local").Strategy;
+const multer = require('multer');
+const ejs = require('ejs');
+
+
+
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+
+var cors = require('cors');
+var mongoose = require ('mongoose');
+var bodyParser= require('body-parser');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -13,12 +25,34 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+
+app.use(bodyParser.json());
+app.use(cors())
+app.use(
+  bodyParser.urlencoded({
+    extended: false
+  })
+)
+const mongoURL =("mongodb://localhost:27017/userinfo")
+console.log (mongoURL)
+mongoose.connect(mongoURL,
+  { useNewUrlParser: true })
+  
+.then(()=>console.log("mongoDB connected"))
+.catch(err => console.log(err))
+mongoose.set('useNewUrlParser', true);
+  mongoose.set('useFindAndModify', false);
+  mongoose.set('useCreateIndex', true);
+
+  var Users = require('./routes/Users')
+
+app.use('/users', Users)
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(express.static(path.join(__dirname, 'panel/build'),{index:false,}));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
